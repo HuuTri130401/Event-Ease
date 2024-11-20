@@ -1,2 +1,2 @@
-# Event-Ease-
+# Event-Ease
 Booking Event System
