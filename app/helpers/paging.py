@@ -1,5 +1,5 @@
 import logging
-from pydantic import BaseModel, conint
+from pydantic import BaseModel, Field, conint
 from abc import ABC, abstractmethod
 from typing import Optional, Generic, Sequence, Type, TypeVar
 from sqlalchemy import asc, desc
@@ -17,8 +17,8 @@ logger = logging.getLogger()
 
 
 class PaginationParams(BaseModel):
-    page_size: Optional[conint(gt=0, lt=1001)] = 10
-    page: Optional[conint(gt=0)] = 1
+    page_size: Optional[int] = Field(default=10, gt=0, lt=1001)
+    page: Optional[int] = Field(default=1, gt=0)
     sort_by: Optional[str] = 'id'
     order: Optional[str] = 'desc'
 

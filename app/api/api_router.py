@@ -4,7 +4,7 @@ from fastapi import APIRouter #Group Endpoint
 from app.api import api_user
 
 router = APIRouter()
-router.include_router(api_user.router, tags=["user"], prefix="/users")
+router.include_router(api_user.router, tags=["User"], prefix="/api/user")
 
 # router.include_router(api_login.router, tags=["login"], prefix="/login")
 # router.include_router(api_healthcheck.router, tags=["health-check"], prefix="/healthcheck")

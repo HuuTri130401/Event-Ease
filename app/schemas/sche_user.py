@@ -2,14 +2,12 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 
-# CHƯA UPDATE CHUẨN FIELD
 class UserBase(BaseModel): 
-    full_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-    is_active: Optional[bool] = True
-
-    class Config:
-        orm_mode = True
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
+    is_deleted: Optional[bool] = None
 
 class UserItemResponse(UserBase):
     id: int
@@ -21,7 +19,17 @@ class UserItemResponse(UserBase):
     phone: str
     address: str
     status: str
-    level: str
+    level: Optional[str] = None 
     role: str
-    company_id: int
-    image_id: int
+    company_id: Optional[int] = None
+    image_id: Optional[int] = None 
+
+class UserRegisterRequest(BaseModel):
+    user_name: str
+    email: EmailStr
+    password: str
+    full_name: Optional[str] 
+    gender: Optional[bool] 
+    date_of_birth: Optional[datetime] 
+    phone: Optional[str] 
+    address: Optional[str] 
