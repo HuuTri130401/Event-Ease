@@ -9,23 +9,23 @@ class UserService:
     def get_user_by_username(self, username: str):
         user = self.user_repository.get_user_by_username(username)
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=f"Người dùng không không tồn tại")
         if user.is_deleted == True or user.status == "inactive":
-            raise HTTPException(status_code=404, detail="User is deleted or inactive")
+            raise HTTPException(status_code=404, detail=f"Người dùng: {user.email} không hợp lệ")
         return user
     
     def get_user_by_id(self, id: int):
         user = self.user_repository.get_user_by_id(id)
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail=f"Người dùng không không tồn tại")
         if user.is_deleted == True or user.status == "inactive":
-            raise HTTPException(status_code=404, detail="User is deleted or inactive")
+            raise HTTPException(status_code=404, detail=f"Người dùng: {user.email} không hợp lệ")
         return user
     
     def get_all_user(self):
         users = self.user_repository.get_all_user()
         if not users:
-            return {"message": "List user is empty"}
+            raise HTTPException(status_code=400, detail="Danh sách role đang trống!")
         return users
     
     def create_user(self, data: UserRegisterRequest):
@@ -33,7 +33,7 @@ class UserService:
         if not exist_user:
             new_user = self.user_repository.create_user(data)
             return new_user
-        raise HTTPException(status_code=400, detail='Email already exist!')
+        raise HTTPException(status_code=400, detail=f'Email {data.email} đã tồn tại!')
 
 def get_user_service(user_repository: UserRepository = Depends(get_user_repository)):
     return UserService(user_repository)

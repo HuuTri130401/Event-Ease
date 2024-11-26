@@ -21,7 +21,7 @@ class UserRepository:
         return self.session.query(User).filter(User.email == email).first()
 
     def get_all_user(self):
-        return self.session.query(User).filter(User.is_deleted == 0, User.status != "inactive").all()
+        return self.session.query(User).filter(User.is_deleted == False, User.status != "inactive")
 
     def get_user_by_id(self, id: int):
         return self.session.query(User).filter(User.id == id).first()

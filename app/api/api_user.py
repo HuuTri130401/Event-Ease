@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_sqlalchemy import db
@@ -13,13 +14,15 @@ logger = logging.getLogger()
 router = APIRouter()
 
 @router.get("", response_model=Page[UserItemResponse], summary="Danh sách người dùng") #API Get list User
-def get(params: PaginationParams = Depends()) -> Any:
+def get(params: PaginationParams = Depends(), user_service: UserService = Depends(get_user_service)) -> Any:
     try:
-        _query = db.session.query(User)
+        _query = user_service.get_all_user()
         users = paginate(model=User, query=_query, params=params)
         return users
     except Exception as e:
-        return HTTPException(status_code=400, detail=logger.error(e))
+        error_details = traceback.format_exc()  # Lấy traceback đầy đủ
+        print(f"Error occurred: {error_details}") 
+        raise CustomException(http_code=400, code='400', message=f"{str(e)}: {error_details}")
 
 @router.get("/{id}", response_model=DataResponse[UserItemResponse], summary="Thông tin chi tiết người dùng")    
 def get_detail(id: int, user_service: UserService = Depends(get_user_service)):
@@ -29,7 +32,7 @@ def get_detail(id: int, user_service: UserService = Depends(get_user_service)):
     except CustomException as e:
         raise CustomException(http_code=400, code='400', message=str(e))
 
-@router.post("", response_model=DataResponse[UserItemResponse], summary="Tạo mới người dùng")
+@router.post("/register", response_model=DataResponse[UserItemResponse], summary="Tạo mới người dùng")
 def create_user(user_data: UserRegisterRequest, user_service: UserService = Depends(get_user_service)) -> Any:    
     try:
         new_user = user_service.create_user(user_data)
