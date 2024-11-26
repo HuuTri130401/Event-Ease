@@ -45,3 +45,11 @@ class MetadataSchema(BaseModel):
     current_page: int
     page_size: int
     total_items: int
+
+
+class SchemaBase(BaseModel):
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
+    is_deleted: Optional[bool] = None

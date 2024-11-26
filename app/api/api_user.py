@@ -32,7 +32,6 @@ def get_detail(id: int, user_service: UserService = Depends(get_user_service)):
 @router.post("", response_model=DataResponse[UserItemResponse], summary="Tạo mới người dùng")
 def create_user(user_data: UserRegisterRequest, user_service: UserService = Depends(get_user_service)) -> Any:    
     try:
-        print(f"Received data api: {user_data.dict()}")
         new_user = user_service.create_user(user_data)
         return DataResponse().custom_response(code="201", message="Tạo mới người dùng thành công", data=new_user)
     except Exception as e:

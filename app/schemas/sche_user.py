@@ -18,7 +18,7 @@ class UserItemResponse(UserBase):
     date_of_birth: datetime
     phone: str
     address: str
-    status: str
+    status: Optional[str] = None 
     level: Optional[str] = None 
     role: str
     company_id: Optional[int] = None
