@@ -1,8 +1,7 @@
 
 from datetime import datetime
-from fastapi import Depends, logger
+from fastapi import Depends
 from fastapi_sqlalchemy import db
-from pydantic import Field
 from sqlalchemy.orm import Session
 from app.core.security import get_password_hash
 from app.db.database import get_db
