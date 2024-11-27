@@ -20,7 +20,7 @@ class UserItemResponse(UserBase):
     address: str
     status: Optional[str] = None 
     level: Optional[str] = None 
-    role: str
+    # role: str
     company_id: Optional[int] = None
     image_id: Optional[int] = None 
 

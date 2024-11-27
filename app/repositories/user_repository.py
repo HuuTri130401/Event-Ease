@@ -45,16 +45,5 @@ class UserRepository:
         self.session.commit()
         return new_user
 
-    def assign_role_to_user(self, user_id: int, role_id: int):
-        user_role = user_roles(user_id, role_id)
-        self.session.add(user_role)
-        self.session.commit()
-
-    def remove_role_from_user(self, user_id: int, role_id: int):
-        user_role = self.session.query(user_roles).filter_by(user_id=user_id, role_id=role_id).first()
-        if user_role:
-            self.session.delete(user_role)
-            self.session.commit()
-
 def get_user_repository(session: Session = Depends(get_db)):
     return UserRepository(session)

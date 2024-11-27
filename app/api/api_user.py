@@ -1,13 +1,13 @@
 import logging
 import traceback
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi_sqlalchemy import db
+from fastapi import APIRouter, Depends
 from app.helpers.exception_handler import CustomException
 from app.helpers.paging import Page, PaginationParams, paginate
 from app.models.model_user import User
 from app.schemas.sche_base import DataResponse
 from app.schemas.sche_user import UserItemResponse, UserRegisterRequest
+from app.schemas.sche_user_role import UserWithRolesResponse
 from app.services.user_service import UserService, get_user_service
 
 logger = logging.getLogger()
@@ -32,10 +32,28 @@ def get_detail(id: int, user_service: UserService = Depends(get_user_service)):
     except CustomException as e:
         raise CustomException(http_code=400, code='400', message=str(e))
 
+@router.get("/{user_id}/roles", response_model=DataResponse[UserWithRolesResponse],summary="Lấy danh sách vai trò của người dùng")
+def get_roles_of_user(user_id: int, params: PaginationParams = Depends(), user_service: UserService = Depends(get_user_service)) -> Any:
+    try:
+        data = user_service.get_roles_by_user_id(user_id)
+        return DataResponse().custom_response(code='200', message='Lấy danh sách vai trò của người dùng', data=data)
+    except Exception as e:
+        error_details = traceback.format_exc()  # Lấy traceback đầy đủ
+        print(f"Error occurred: {error_details}") 
+        raise CustomException(http_code=400, code='400', message=f"{str(e)}: {error_details}")
+
 @router.post("/register", response_model=DataResponse[UserItemResponse], summary="Tạo mới người dùng")
 def create_user(user_data: UserRegisterRequest, user_service: UserService = Depends(get_user_service)) -> Any:    
     try:
         new_user = user_service.create_user(user_data)
         return DataResponse().custom_response(code="201", message="Tạo mới người dùng thành công", data=new_user)
     except Exception as e:
+        raise CustomException(http_code=400, code='400', message=str(e))
+    
+@router.post("/{user_id}/roles", response_model = None, summary="Gán vai trò cho người dùng")
+def assign_roles_to_user(user_id: int, role_ids: list[int], user_service: UserService = Depends(get_user_service)):
+    try:
+        data=user_service.assign_roles_to_user(user_id, role_ids)
+        return DataResponse().custom_response(code="201", message="Gán vai trò cho người dùng thành công", data=data)
+    except CustomException as e:
         raise CustomException(http_code=400, code='400', message=str(e))

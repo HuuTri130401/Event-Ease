@@ -17,6 +17,9 @@ class RoleRepository:
     def get_role_by_name(self, name: str):
         return self.session.query(Role).filter(Role.name == name).first()
 
+    def get_list_role_by_ids(self, role_ids: list[int]):
+        return self.session.query(Role).filter(Role.id.in_(role_ids)).all()
+
     def create_role(self, data: RoleRequestCreate):
         new_role = Role(
             name=data.name,

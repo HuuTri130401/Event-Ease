@@ -7,5 +7,6 @@ class RoleRequestCreate(BaseModel):
     description: str
 
 class RoleReponse(SchemaBase):
+    id: int
     name: str
     description: str
