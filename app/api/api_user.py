@@ -66,7 +66,7 @@ def change_status(user_id: int, user_service: UserService = Depends(get_user_ser
         print(f"Error occurred: {error_details}")
         raise CustomException(http_code=400, code='400', message=str(e))
 
-@router.put("/delete_user/{user_id}", summary="Xóa người dùng")
+@router.delete("/delete_user/{user_id}", summary="Xóa người dùng")
 def delete_user(user_id: int, user_service: UserService = Depends(get_user_service)):
     try:
         result = user_service.delete_user(user_id=user_id)

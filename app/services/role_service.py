@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from app.helpers.exception_handler import CustomException
 from app.repositories.role_repository import RoleRepository, get_role_repository
-from app.schemas.sche_role import RoleRequestCreate
+from app.schemas.sche_role import RoleRequestCreate, RoleRequestUpdate
 
 
 class RoleService:
@@ -27,5 +27,17 @@ class RoleService:
             return new_role
         raise HTTPException(status_code=400, detail=f"Role có tên {data.name} đã tồn tại!")
     
+    def update_role(self, data: RoleRequestUpdate, id: int):
+        exist_role = self.role_repository.get_role_by_id(id)
+        if not exist_role:
+            raise HTTPException(status_code=400, detail=f'Role không tồn tại!!')
+        self.role_repository.update_role(data, id)
+
+    def delete_role(self, role_id: int):
+        exist_role = self.role_repository.get_role_by_id(role_id)
+        if not exist_role:
+            raise HTTPException(status_code=400, detail=f'Role không tồn tại!!')
+        self.role_repository.delete_role(role_id)
+
 def get_role_service(role_repository: RoleRepository = Depends(get_role_repository)):
        return RoleService(role_repository)

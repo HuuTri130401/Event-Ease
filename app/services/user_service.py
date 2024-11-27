@@ -97,7 +97,6 @@ class UserService:
 
         if role_id not in existing_role_ids:
             raise HTTPException(status_code=404, detail="Vai trò không tồn tại trên người dùng này!")
-
         self.user_role_repository.remove_role_from_user(user_id=user_id, role_id=role_id)
 
 def get_user_service(

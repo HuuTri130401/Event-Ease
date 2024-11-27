@@ -3,7 +3,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.model_user import Role
-from app.schemas.sche_role import RoleRequestCreate
+from app.schemas.sche_role import RoleRequestCreate, RoleRequestUpdate
 
 class RoleRepository:
     def __init__(self, session: Session):
@@ -30,5 +30,18 @@ class RoleRepository:
         self.session.commit()
         return new_role
     
+    def update_role(self, data: RoleRequestUpdate, id: int):
+        exist_role = self.session.query(Role).filter(Role.id == id).first()
+        if exist_role:
+            exist_role.name = data.name
+            exist_role.description = data.name
+            self.session.commit()
+
+    def delete_role(self, role_id: int):
+        exist_role = self.session.query(Role).filter(and_(Role.id == role_id, Role.is_deleted == False)).first()
+        if exist_role:
+            exist_role.is_deleted = True
+            self.session.commit()
+
 def get_role_repository(session: Session = Depends(get_db)):
     return RoleRepository(session)
