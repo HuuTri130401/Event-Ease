@@ -1,7 +1,8 @@
+from operator import and_
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.models.model_user import Role, User, user_roles
+from app.models.model_user import Role, UserRole
 
 class UserRoleRepository:
     def __init__(self, session: Session):
@@ -10,21 +11,21 @@ class UserRoleRepository:
     def get_roles_by_user_id(self, user_id: int):
         return(
             self.session.query(Role)
-            .join(user_roles, user_roles.c.role_id == Role.id)
-            .filter(user_roles.c.user_id == user_id)
+            .join(UserRole, and_(UserRole.role_id == Role.id, UserRole.is_deleted == False))
+            .filter(UserRole.user_id == user_id)
             .all()
         )
     
     def assign_role_to_user(self, user_id: int, role_id: int):
-        user_role = user_roles.insert().values(user_id=user_id, role_id=role_id)
-        self.session.execute(user_role)
+        user_role = UserRole(user_id=user_id, role_id=role_id)
+        self.session.add(user_role)
         self.session.commit()
 
     def remove_role_from_user(self, user_id: int, role_id: int):
-        user_role = self.session.query(user_roles).filter_by(user_id=user_id, role_id=role_id).first()
+        user_role = self.session.query(UserRole).filter_by(user_id=user_id, role_id=role_id).first()
         if user_role:
-            self.session.delete(user_role)
-            self.session.commit()
+            user_role.is_deleted = True
+            self.session.commit()        
 
 def get_user_role_repository(session: Session = Depends(get_db)):
     return UserRoleRepository(session)

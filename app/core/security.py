@@ -38,12 +38,7 @@ def get_current_user(http_authorization_credentials: str = Depends(reusable_oaut
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Token không hợp lệ")
-    print(f"Username: {username}")
-
     user = session.query(User).filter(User.user_name == username).first()
-    print(f"User Query Result: {user}")
-    print(f"User Query Result (dict): {user.__dict__}")
-
     if user is None:
         raise HTTPException(
              status_code=status.HTTP_403_FORBIDDEN, 

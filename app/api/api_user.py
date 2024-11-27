@@ -1,7 +1,7 @@
 import logging
 import traceback
 from typing import Any
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.helpers.exception_handler import CustomException
 from app.helpers.paging import Page, PaginationParams, paginate
 from app.models.model_user import User
@@ -33,7 +33,7 @@ def get_detail(id: int, user_service: UserService = Depends(get_user_service)):
         raise CustomException(http_code=400, code='400', message=str(e))
 
 @router.get("/{user_id}/roles", response_model=DataResponse[UserWithRolesResponse],summary="Lấy danh sách vai trò của người dùng")
-def get_roles_of_user(user_id: int, params: PaginationParams = Depends(), user_service: UserService = Depends(get_user_service)) -> Any:
+def get_roles_of_user(user_id: int, user_service: UserService = Depends(get_user_service)) -> Any:
     try:
         data = user_service.get_roles_by_user_id(user_id)
         return DataResponse().custom_response(code='200', message='Lấy danh sách vai trò của người dùng', data=data)
@@ -41,6 +41,42 @@ def get_roles_of_user(user_id: int, params: PaginationParams = Depends(), user_s
         error_details = traceback.format_exc()  # Lấy traceback đầy đủ
         print(f"Error occurred: {error_details}") 
         raise CustomException(http_code=400, code='400', message=f"{str(e)}: {error_details}")
+
+@router.put("/{user_id}/roles/{role_id}", summary="Gỡ bỏ vai trò của người dùng")
+def remove_role_from_user(user_id: int, role_id: int, user_service: UserService = Depends(get_user_service)):
+    try:
+        result = user_service.remove_role_from_user(user_id=user_id, role_id=role_id)
+        return DataResponse().custom_response(code='200', message="Vai trò đã được gỡ bỏ", data=result)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        error_details = traceback.format_exc()
+        print(f"Error occurred: {error_details}")
+        raise CustomException(http_code=400, code='400', message=str(e))
+
+@router.put("/change_status/{user_id}", summary="Khóa / Mở khóa người dùng")
+def change_status(user_id: int, user_service: UserService = Depends(get_user_service)):
+    try:
+        result = user_service.change_status(user_id=user_id)
+        return DataResponse().custom_response(code='200', message="Chuyển đổi trạng thái thành công", data=result)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        error_details = traceback.format_exc()
+        print(f"Error occurred: {error_details}")
+        raise CustomException(http_code=400, code='400', message=str(e))
+
+@router.put("/delete_user/{user_id}", summary="Xóa người dùng")
+def delete_user(user_id: int, user_service: UserService = Depends(get_user_service)):
+    try:
+        result = user_service.delete_user(user_id=user_id)
+        return DataResponse().custom_response(code='200', message=f"Xóa người dùng thành công", data=result)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        error_details = traceback.format_exc()
+        print(f"Error occurred: {error_details}")
+        raise CustomException(http_code=400, code='400', message=str(e))
 
 @router.post("/register", response_model=DataResponse[UserItemResponse], summary="Tạo mới người dùng")
 def create_user(user_data: UserRegisterRequest, user_service: UserService = Depends(get_user_service)) -> Any:    

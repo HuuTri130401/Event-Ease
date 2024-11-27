@@ -1,13 +1,10 @@
 from enum import unique
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Table
-from app.models.model_base import Base, BareBaseModel
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from app.models.model_base import BareBaseModel
 
-user_roles = Table(
-    'user_roles',
-    Base.metadata,
-    Column('user_id', Integer, primary_key=True),
-    Column('role_id', Integer, primary_key=True)
-)
+class UserRole(BareBaseModel):  
+    user_id = Column(Integer, nullable=False)
+    role_id = Column(Integer, nullable=False)
 
 class User(BareBaseModel):
     full_name = Column(String, index=True)

@@ -1,3 +1,4 @@
+from operator import and_
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
@@ -12,13 +13,13 @@ class RoleRepository:
         return self.session.query(Role).filter(Role.is_deleted == False) # Query thay List
     
     def get_role_by_id(self, id: int):
-        return self.session.query(Role).filter(Role.id == id).first()
+        return self.session.query(Role).filter(and_(Role.id == id, Role.is_deleted == False)).first()
     
     def get_role_by_name(self, name: str):
-        return self.session.query(Role).filter(Role.name == name).first()
+        return self.session.query(Role).filter(and_(Role.name == name, Role.is_deleted == False)).first()
 
     def get_list_role_by_ids(self, role_ids: list[int]):
-        return self.session.query(Role).filter(Role.id.in_(role_ids)).all()
+        return self.session.query(Role).filter(and_(Role.id.in_(role_ids), Role.is_deleted == False)).all()
 
     def create_role(self, data: RoleRequestCreate):
         new_role = Role(
