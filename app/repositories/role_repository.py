@@ -45,10 +45,13 @@ class RoleRepository:
     def update_role(self, data: RoleRequestUpdate, id: int):
         exist_role = self.session.query(Role).filter(Role.id == id).first()
         if exist_role:
-            exist_role.name = data.name
-            exist_role.description = data.name
-            self.session.commit()
-            return exist_role
+            for key, value in data.model_dump(exclude_unset=True).items():
+                setattr(exist_role, key, value)
+                self.session.commit()
+                return exist_role
+            # exist_role.name = data.name
+            # exist_role.description = data.name
+
 
     def delete_role(self, role_id: int):
         exist_role = (
