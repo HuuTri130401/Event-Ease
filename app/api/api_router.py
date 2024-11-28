@@ -1,5 +1,5 @@
 # Tổ chức và định tuyến API Endpoint FastAPI
-from fastapi import APIRouter #Group Endpoint
+from fastapi import APIRouter  # Group Endpoint
 from app.api import api_auth, api_user, api_role
 
 router = APIRouter()

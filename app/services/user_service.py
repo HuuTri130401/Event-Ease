@@ -1,13 +1,22 @@
 from fastapi import Depends, HTTPException
 from app.repositories.role_repository import RoleRepository, get_role_repository
 from app.repositories.user_repository import UserRepository, get_user_repository
-from app.repositories.user_role_repository import UserRoleRepository, get_user_role_repository
-from app.schemas.sche_user import UserRegisterRequest
+from app.repositories.user_role_repository import (
+    UserRoleRepository,
+    get_user_role_repository,
+)
+from app.schemas.user import UserRegisterRequest, UserRequestUpdate
 from app.models.model_user import User, UserRole
-from app.schemas.sche_user_role import UserWithRolesResponse
+from app.schemas.user_role import UserWithRolesResponse
+
 
 class UserService:
-    def __init__(self, user_repository: UserRepository, role_repository: RoleRepository, user_role_repository: UserRoleRepository):
+    def __init__(
+        self,
+        user_repository: UserRepository,
+        role_repository: RoleRepository,
+        user_role_repository: UserRoleRepository,
+    ):
         self.user_repository = user_repository
         self.role_repository = role_repository
         self.user_role_repository = user_role_repository
@@ -15,24 +24,34 @@ class UserService:
     def get_user_by_username(self, username: str):
         user = self.user_repository.get_user_by_username(username)
         if not user:
-            raise HTTPException(status_code=404, detail=f"Người dùng không không tồn tại")
+            raise HTTPException(
+                status_code=404, detail=f"Người dùng không không tồn tại"
+            )
         if user.is_deleted == True:
-            raise HTTPException(status_code=404, detail=f"Người dùng: {user.email} không hợp lệ")
+            raise HTTPException(
+                status_code=404, detail=f"Người dùng: {user.email} không hợp lệ"
+            )
         return user
-    
+
     def get_user_by_id(self, id: int):
         user = self.user_repository.get_user_by_id(id)
         if not user:
-            raise HTTPException(status_code=404, detail=f"Người dùng không không tồn tại")
+            raise HTTPException(
+                status_code=404, detail=f"Người dùng không không tồn tại"
+            )
         if user.is_deleted == True:
-            raise HTTPException(status_code=404, detail=f"Người dùng: {user.email} không hợp lệ")
+            raise HTTPException(
+                status_code=404, detail=f"Người dùng: {user.email} không hợp lệ"
+            )
         return user
 
     def get_roles_by_user_id(self, user_id: int):
         print(f"user id: {user_id}")
         user = self.user_repository.get_user_by_id(user_id)
         if not user:
-            raise HTTPException(status_code=404, detail="Người dùng này không có vai trò nào!")
+            raise HTTPException(
+                status_code=404, detail="Người dùng này không có vai trò nào!"
+            )
         roles = self.user_role_repository.get_roles_by_user_id(user_id)
         return UserWithRolesResponse(
             user_id=user.id,
@@ -44,7 +63,7 @@ class UserService:
             date_of_birth=user.date_of_birth,
             status=user.status,
             level=user.level,
-            roles=roles  # Ánh xạ vai trò
+            roles=roles,  # Ánh xạ vai trò
         )
 
     def get_all_user(self):
@@ -52,24 +71,30 @@ class UserService:
         if not users:
             raise HTTPException(status_code=400, detail="Danh sách role đang trống!")
         return users
-    
+
     def create_user(self, data: UserRegisterRequest):
         exist_user = self.user_repository.get_user_by_email(data.email)
         if not exist_user:
             new_user = self.user_repository.create_user(data)
             return new_user
-        raise HTTPException(status_code=400, detail=f'Email {data.email} đã tồn tại!')
+        raise HTTPException(status_code=400, detail=f"Email {data.email} đã tồn tại!")
+
+    def update_user(self, id: int, data: UserRequestUpdate):
+        exist_user = self.user_repository.get_user_by_id(id)
+        if not exist_user:
+            raise HTTPException(status_code=400, detail=f"Người dùng không tồn tại!!")
+        return self.user_repository.update_user(id, data)
 
     def change_status(self, user_id: int):
         exist_user = self.user_repository.get_user_by_id(user_id)
         if not exist_user:
-            raise HTTPException(status_code=400, detail=f'Người dùng không tồn tại!!')
-        self.user_repository.inactive_user(user_id)
+            raise HTTPException(status_code=400, detail=f"Người dùng không tồn tại!!")
+        return self.user_repository.inactive_user(user_id)
 
     def delete_user(self, user_id: int):
         exist_user = self.user_repository.get_user_by_id(user_id)
         if not exist_user:
-            raise HTTPException(status_code=400, detail=f'Người dùng không tồn tại!!')
+            raise HTTPException(status_code=400, detail=f"Người dùng không tồn tại!!")
         self.user_repository.delete_user(user_id)
 
     def assign_roles_to_user(self, user_id: int, role_ids: list[int]):
@@ -78,14 +103,22 @@ class UserService:
             raise HTTPException(status_code=404, detail="Người dùng không tồn tại!")
 
         exist_roles = self.user_role_repository.get_roles_by_user_id(user_id)
-        existing_role_ids = {role.id for role in exist_roles} # Lấy role id trong exist_roles
-        role_id_not_assign_yet = [role_id for role_id in role_ids if role_id not in existing_role_ids]
+        existing_role_ids = {
+            role.id for role in exist_roles
+        }  # Lấy role id trong exist_roles
+        role_id_not_assign_yet = [
+            role_id for role_id in role_ids if role_id not in existing_role_ids
+        ]
         valid_roles = self.role_repository.get_list_role_by_ids(role_id_not_assign_yet)
         if not valid_roles:
-            raise HTTPException(status_code=404, detail="Không tìm thấy vai trò nào hợp lệ")
+            raise HTTPException(
+                status_code=404, detail="Không tìm thấy vai trò nào hợp lệ"
+            )
 
         for role_id in role_id_not_assign_yet:
-            self.user_role_repository.assign_role_to_user(user_id=user_id, role_id=role_id)
+            self.user_role_repository.assign_role_to_user(
+                user_id=user_id, role_id=role_id
+            )
 
     def remove_role_from_user(self, user_id: int, role_id: int):
         exist_user = self.user_repository.get_user_by_id(user_id)
@@ -96,16 +129,21 @@ class UserService:
         existing_role_ids = {role.id for role in exist_roles}
 
         if role_id not in existing_role_ids:
-            raise HTTPException(status_code=404, detail="Vai trò không tồn tại trên người dùng này!")
-        self.user_role_repository.remove_role_from_user(user_id=user_id, role_id=role_id)
+            raise HTTPException(
+                status_code=404, detail="Vai trò không tồn tại trên người dùng này!"
+            )
+        self.user_role_repository.remove_role_from_user(
+            user_id=user_id, role_id=role_id
+        )
+
 
 def get_user_service(
-        user_repository: UserRepository = Depends(get_user_repository),
-        role_repository: RoleRepository = Depends(get_role_repository),
-        user_role_repository: UserRoleRepository = Depends(get_user_role_repository)
-    ):
+    user_repository: UserRepository = Depends(get_user_repository),
+    role_repository: RoleRepository = Depends(get_role_repository),
+    user_role_repository: UserRoleRepository = Depends(get_user_role_repository),
+):
     return UserService(
         user_repository=user_repository,
         role_repository=role_repository,
-        user_role_repository=user_role_repository
+        user_role_repository=user_role_repository,
     )

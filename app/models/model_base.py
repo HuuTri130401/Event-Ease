@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import as_declarative, declared_attr
 
+
 @as_declarative()
 class Base:
     __abstract__ = True
@@ -11,6 +12,7 @@ class Base:
     @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
+
 
 class BareBaseModel(Base):
     __abstract__ = True

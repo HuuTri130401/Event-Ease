@@ -5,11 +5,12 @@ from pydantic import BaseModel
 
 T = TypeVar("T")
 
+
 class ResponseSchemaBase(BaseModel):
     __abstract__ = True
 
-    code: str = ''
-    message: str = ''
+    code: str = ""
+    message: str = ""
 
     def custom_response(self, code: str, message: str):
         self.code = code
@@ -17,8 +18,8 @@ class ResponseSchemaBase(BaseModel):
         return self
 
     def success_response(self):
-        self.code = '000'
-        self.message = 'Thành công'
+        self.code = "000"
+        self.message = "Thành công"
         return self
 
 
@@ -35,8 +36,8 @@ class DataResponse(ResponseSchemaBase, GenericModel, Generic[T]):
         return self
 
     def success_response(self, data: T):
-        self.code = '000'
-        self.message = 'Thành công'
+        self.code = "000"
+        self.message = "Thành công"
         self.data = data
         return self
 
