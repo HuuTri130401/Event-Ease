@@ -12,11 +12,14 @@ from app.helpers.exception_handler import CustomException, http_exception_handle
 logging.config.fileConfig(settings.LOGGING_CONFIG_FILE, disable_existing_loggers=False)
 Base.metadata.create_all(bind=engine)
 
+
 def get_application() -> FastAPI:
     application = FastAPI(
-        title=settings.PROJECT_NAME, docs_url="/docs", redoc_url='/re-docs',
+        title=settings.PROJECT_NAME,
+        docs_url="/docs",
+        redoc_url="/re-docs",
         openapi_url=f"{settings.API_PREFIX}/openapi.json",
-        description='''Event Booking System with FastAPI micro framework + Postgre SQL'''
+        description="""Event Booking System with FastAPI micro framework + Postgre SQL""",
     )
     application.add_middleware(
         CORSMiddleware,
@@ -31,6 +34,7 @@ def get_application() -> FastAPI:
 
     return application
 
+
 app = get_application()
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
