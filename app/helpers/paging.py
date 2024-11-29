@@ -1,5 +1,5 @@
 import logging
-from pydantic import BaseModel, Field, conint
+from pydantic import BaseModel, Field
 from abc import ABC, abstractmethod
 from typing import Optional, Generic, Sequence, Type, TypeVar
 from sqlalchemy import asc, desc

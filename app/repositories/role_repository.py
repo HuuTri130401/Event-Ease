@@ -37,7 +37,7 @@ class RoleRepository:
         )
 
     def create_role(self, data: RoleRequestCreate):
-        new_role = Role(name=data.name, description=data.description)
+        new_role = Role(name=data.name.upper(), description=data.description)
         self.session.add(new_role)
         self.session.commit()
         return new_role

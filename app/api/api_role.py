@@ -2,6 +2,7 @@ import logging
 import traceback
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
+from app.core.security import check_permissions
 from app.helpers.exception_handler import CustomException
 from app.helpers.paging import Page, PaginationParams, paginate
 from app.models.model_user import Role
@@ -13,7 +14,12 @@ logger = logging.getLogger()
 router = APIRouter()
 
 
-@router.get("", response_model=Page[RoleResponse], summary="Danh sách roles")
+@router.get(
+    "",
+    response_model=Page[RoleResponse],
+    summary="Danh sách roles",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
+)
 def get(
     params: PaginationParams = Depends(),
     role_service: RoleService = Depends(get_role_service),
@@ -31,7 +37,10 @@ def get(
 
 
 @router.get(
-    "/{id}", response_model=DataResponse[RoleResponse], summary="Xem chi tiết role"
+    "/{id}",
+    response_model=DataResponse[RoleResponse],
+    summary="Xem chi tiết role",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
 )
 def get_detail(id: int, role_service: RoleService = Depends(get_role_service)) -> Any:
     try:
@@ -43,7 +52,12 @@ def get_detail(id: int, role_service: RoleService = Depends(get_role_service)) -
         raise CustomException(http_code=404, code="404", message=str(e))
 
 
-@router.post("", response_model=DataResponse[RoleResponse], summary="Tạo mới role")
+@router.post(
+    "",
+    response_model=DataResponse[RoleResponse],
+    summary="Tạo mới role",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
+)
 def create_role(
     role_data: RoleRequestCreate, role_service: RoleService = Depends(get_role_service)
 ) -> Any:
@@ -56,7 +70,12 @@ def create_role(
         raise CustomException(http_code=400, code="400", message=str(e))
 
 
-@router.put("/{id}", response_model=DataResponse[RoleResponse], summary="Cập nhật role")
+@router.put(
+    "/{id}",
+    response_model=DataResponse[RoleResponse],
+    summary="Cập nhật role",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
+)
 def update_role(
     id: int,
     role_data: RoleRequestUpdate,
@@ -71,7 +90,11 @@ def update_role(
         raise CustomException(http_code=400, code="400", message=str(e))
 
 
-@router.delete("/delete_role/{id}", summary="Xóa role")
+@router.delete(
+    "/delete_role/{id}",
+    summary="Xóa role",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
+)
 def delete_user(id: int, role_service: RoleService = Depends(get_role_service)):
     try:
         result = role_service.delete_role(role_id=id)

@@ -20,6 +20,18 @@ class UserRoleRepository:
             .all()
         )
 
+    def get_role_names_by_user_id(self, user_id: int):
+        roles = (
+            self.session.query(Role.name)
+            .join(
+                UserRole,
+                and_(UserRole.role_id == Role.id, Role.is_deleted == False),
+            )
+            .filter(and_(UserRole.user_id == user_id, UserRole.is_deleted == False))
+            .all()
+        )
+        return [role.name for role in roles]
+
     def assign_role_to_user(self, user_id: int, role_id: int):
         user_role = UserRole(user_id=user_id, role_id=role_id)
         self.session.add(user_role)
