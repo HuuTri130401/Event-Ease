@@ -2,6 +2,7 @@ import logging
 import traceback
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
+from app.core.security import check_permissions
 from app.helpers.exception_handler import CustomException
 from app.helpers.paging import Page, PaginationParams, paginate
 from app.models.model_user import User
@@ -19,7 +20,10 @@ router = APIRouter()
 
 
 @router.get(
-    "", response_model=Page[UserItemResponse], summary="Danh sách người dùng"
+    "",
+    response_model=Page[UserItemResponse],
+    summary="Danh sách người dùng",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
 )  # API Get list User
 def get(
     params: PaginationParams = Depends(),
@@ -41,6 +45,7 @@ def get(
     "/{id}",
     response_model=DataResponse[UserItemResponse],
     summary="Thông tin chi tiết người dùng",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
 )
 def get_detail(id: int, user_service: UserService = Depends(get_user_service)):
     try:
@@ -73,7 +78,11 @@ def get_roles_of_user(
         )
 
 
-@router.put("/{user_id}/roles/{role_id}", summary="Gỡ bỏ vai trò của người dùng")
+@router.put(
+    "/{user_id}/roles/{role_id}",
+    summary="Gỡ bỏ vai trò của người dùng",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
+)
 def remove_role_from_user(
     user_id: int, role_id: int, user_service: UserService = Depends(get_user_service)
 ):
@@ -90,7 +99,12 @@ def remove_role_from_user(
         raise CustomException(http_code=400, code="400", message=str(e))
 
 
-@router.put("/change_status/{user_id}",response_model=DataResponse[UserItemResponse] ,summary="Khóa / Mở khóa người dùng")
+@router.put(
+    "/change_status/{user_id}",
+    response_model=DataResponse[UserItemResponse],
+    summary="Khóa / Mở khóa người dùng",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
+)
 def change_status(user_id: int, user_service: UserService = Depends(get_user_service)):
     try:
         result = user_service.change_status(user_id=user_id)
@@ -124,7 +138,11 @@ def update_user(
         raise CustomException(http_code=400, code="400", message=str(e))
 
 
-@router.delete("/delete_user/{user_id}", summary="Xóa người dùng")
+@router.delete(
+    "/delete_user/{user_id}",
+    summary="Xóa người dùng",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
+)
 def delete_user(user_id: int, user_service: UserService = Depends(get_user_service)):
     try:
         result = user_service.delete_user(user_id=user_id)
@@ -158,7 +176,10 @@ def create_user(
 
 
 @router.post(
-    "/{user_id}/roles", response_model=None, summary="Gán vai trò cho người dùng"
+    "/{user_id}/roles",
+    response_model=None,
+    summary="Gán vai trò cho người dùng",
+    dependencies=[Depends(check_permissions(["ADMIN"]))],
 )
 def assign_roles_to_user(
     user_id: int,

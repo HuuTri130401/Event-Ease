@@ -10,6 +10,11 @@ from app.models.model_user import User
 from sqlalchemy.orm import Session
 from starlette import status
 
+from app.repositories.user_role_repository import (
+    UserRoleRepository,
+    get_user_role_repository,
+)
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 reusable_oauth2 = HTTPBearer(scheme_name="Authorization")
 
@@ -59,3 +64,17 @@ def get_current_user(
             detail="Không thể xác thực thông tin đăng nhập 3",
         )
     return user
+
+
+def check_permissions(required_roles: list[str]):
+    def permission_checker(
+        current_user: User = Depends(get_current_user),
+        db: Session = Depends(get_db),
+        user_role_repository: UserRoleRepository = Depends(get_user_role_repository),
+    ):
+        user_roles = user_role_repository.get_role_names_by_user_id(current_user.id)
+        if not any(role in required_roles for role in user_roles):
+            raise HTTPException(status_code=403, detail="Bạn không có quyền truy cập")
+        return current_user
+
+    return permission_checker
